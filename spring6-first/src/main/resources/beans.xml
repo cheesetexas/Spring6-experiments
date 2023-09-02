@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd">
+
+    <!--
+    配置HelloWorld所对应的bean，即将HelloWorld的对象交给Spring的IOC容器管理
+    通过bean标签配置IOC容器所管理的bean
+    属性：
+        id：设置bean的唯一标识
+        class：设置bean所对应类型的全类名
+	-->
+    <bean id="helloWorld" class="org.example.bean.HelloWorld"/>
+
+    <bean id="studentOne" class="org.example.bean.Student">
+        <!-- property标签：通过组件类的setXxx()方法给组件对象设置属性 -->
+        <!-- name属性：指定属性名（这个属性名是getXxx()、setXxx()方法定义的，和成员变量无关） -->
+        <!-- value属性：指定属性值 -->
+        <property name="id" value="1001"/>
+        <property name="name" value="张三"/>
+        <property name="age" value="23"/>
+        <property name="sex" value="男"/>
+    </bean>
+
+    <bean id="studentTwo" class="org.example.bean.Student">
+        <!--
+        constructor-arg标签还有两个属性可以进一步描述构造器参数：
+            index属性：指定参数所在位置的索引（从0开始）
+            name属性：指定参数名
+        -->
+        <constructor-arg value="1002"/>
+        <constructor-arg value="李四"/>
+        <constructor-arg value="33"/>
+        <constructor-arg value="女"/>
+    </bean>
+
+    <bean id="clazzOne" class="org.example.bean.Clazz">
+        <property name="clazzId" value="1111"/>
+        <property name="clazzName" value="财源滚滚班"/>
+    </bean>
+
+    <!--方式一：引用外部bean-->
+    <bean id="studentThree" class="org.example.bean.Student">
+        <property name="id" value="1004"/>
+        <property name="name" value="赵六"/>
+        <property name="age" value="26"/>
+        <property name="sex" value="女"/>
+        <!-- ref属性：引用IOC容器中某个bean的id，将所对应的bean为属性赋值 -->
+        <property name="clazz" ref="clazzOne"/>
+        <property name="hobbies">
+            <array>
+                <value>抽烟</value>
+                <value>喝酒</value>
+                <value>烫头</value>
+            </array>
+        </property>
+        <property name="teacherMap">
+            <map>
+                <entry key="10010" value-ref="teacherOne"/>
+                <entry key="10086" value-ref="teacherTwo"/>
+            </map>
+        </property>
+        <!--
+        引用集合类型的bean：
+        <property name="teacherMap" ref="teacherMap"/>
+        -->
+    </bean>
+
+    <!--方式二：内部bean-->
+    <bean id="studentFour" class="org.example.bean.Student">
+        <property name="id" value="1004"/>
+        <property name="name" value="赵六"/>
+        <property name="age" value="26"/>
+        <property name="sex" value="女"/>
+        <property name="clazz">
+            <!-- 在一个bean中再声明一个bean就是内部bean -->
+            <!-- 内部bean只能用于给属性赋值，不能在外部通过IOC容器获取，因此可以省略id属性 -->
+            <bean class="org.example.bean.Clazz">
+                <property name="clazzId" value="2222"/>
+                <property name="clazzName" value="远大前程班"/>
+            </bean>
+        </property>
+    </bean>
+
+    <!-- 方式三：级联属性赋值 -->
+    <bean id="studentFive" class="org.example.bean.Student">
+        <property name="id" value="1004"/>
+        <property name="name" value="赵六"/>
+        <property name="age" value="26"/>
+        <property name="sex" value="女"/>
+        <property name="clazz" ref="clazzOne"/>
+        <property name="clazz.clazzId" value="3333"/>
+        <property name="clazz.clazzName" value="最强王者班"/>
+    </bean>
+
+    <bean id="clazzTwo" class="org.example.bean.Clazz">
+        <property name="clazzId" value="4444"/>
+        <property name="clazzName" value="Javaee0222"/>
+        <property name="students">
+            <list>
+                <ref bean="studentOne"/>
+                <ref bean="studentTwo"/>
+                <ref bean="studentThree"/>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="teacherOne" class="org.example.bean.Teacher">
+        <property name="teacherId" value="10010"/>
+        <property name="teacherName" value="大宝"/>
+    </bean>
+
+    <bean id="teacherTwo" class="org.example.bean.Teacher">
+        <property name="teacherId" value="10086"/>
+        <property name="teacherName" value="二宝"/>
+    </bean>
+
+    <!--使用util:list、util:map标签必须引入相应的命名空间-->
+    <!--list集合类型的bean-->
+    <util:list id="students">
+        <ref bean="studentOne"/>
+        <ref bean="studentTwo"/>
+        <ref bean="studentThree"/>
+    </util:list>
+    <!--map集合类型的bean-->
+    <util:map id="teacherMap">
+        <entry key="10010" value-ref="teacherOne"/>
+        <entry key="10086" value-ref="teacherTwo"/>
+    </util:map>
+</beans>
