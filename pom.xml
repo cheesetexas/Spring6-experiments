@@ -11,6 +11,7 @@
     <modules>
         <module>reflect</module>
         <module>spring6-aop</module>
+        <module>spring6-junit5</module>
     </modules>
 
     <properties>

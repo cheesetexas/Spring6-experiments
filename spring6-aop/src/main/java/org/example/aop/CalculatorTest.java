@@ -11,7 +11,7 @@ public class CalculatorTest {
 
     @Test
     public void testAdd() {
-        ApplicationContext ac = new ClassPathXmlApplicationContext("log.xml");
+        ApplicationContext ac = new ClassPathXmlApplicationContext("beans.xml");
         Calculator calculator = ac.getBean(Calculator.class);
         int add = calculator.add(1, 1);
         logger.info("执行成功:"+add);
