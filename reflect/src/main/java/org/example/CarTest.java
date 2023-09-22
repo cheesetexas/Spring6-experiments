@@ -83,11 +83,11 @@ public class CarTest {
         Class clazz = car.getClass();
         // 1. public方法
         Method[] methods = clazz.getMethods();
-        for (Method m1 : methods) {
-            // System.out.println(m1.getName());
+        for (Method m : methods) {
+            // System.out.println(m.getName());
             // 执行方法 toString
-            if (m1.getName().equals("toString")) {
-                String invoke = (String) m1.invoke(car);
+            if (m.getName().equals("toString")) {
+                String invoke = (String) m.invoke(car);
                 System.out.println("toString执行了：" + invoke);
             }
         }

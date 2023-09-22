@@ -2,6 +2,7 @@ package org.example;
 
 import java.io.File;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -11,7 +12,7 @@ import java.util.Map;
 
 public class AnnotationApplicationContext implements ApplicationContext {
 
-    private HashMap<Class, Object> beanFactory = new HashMap<>();
+    private final HashMap<Class, Object> beanFactory = new HashMap<>();
     private static String rootPath;
 
     @Override
@@ -25,18 +26,17 @@ public class AnnotationApplicationContext implements ApplicationContext {
     public AnnotationApplicationContext(String basePackage) {
         try {
             String packageDirName = basePackage.replaceAll("\\.", "\\\\");
-            Enumeration<URL> dirs =Thread.currentThread().getContextClassLoader().getResources(packageDirName);
+            Enumeration<URL> dirs = Thread.currentThread().getContextClassLoader().getResources(packageDirName);
             while (dirs.hasMoreElements()) {
                 URL url = dirs.nextElement();
                 String filePath = URLDecoder.decode(url.getFile(), StandardCharsets.UTF_8);
-                rootPath = filePath.substring(0, filePath.length()-packageDirName.length());
+                rootPath = filePath.substring(0, filePath.length() - packageDirName.length());
                 loadBean(new File(filePath));
             }
 
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-
         loadAutowired();
     }
 
@@ -63,20 +63,21 @@ public class AnnotationApplicationContext implements ApplicationContext {
                             if (!aClass.isInterface()) {
                                 Bean annotation = aClass.getAnnotation(Bean.class);
                                 if (annotation != null) {
-                                    Object instance = aClass.newInstance();
+                                    Object instance = aClass.getConstructor().newInstance();
                                     //判断一下有没有接口
                                     if (aClass.getInterfaces().length > 0) {
                                         //如果有接口把接口的class当成key，实例对象当成value
-                                        System.out.println("正在加载【" + aClass.getInterfaces()[0] + "】,实例对象是：" + instance.getClass().getName());
+                                        System.out.println("正在加载【" + aClass.getInterfaces()[0] + "】, 实例对象是：" + instance.getClass().getName());
                                         beanFactory.put(aClass.getInterfaces()[0], instance);
                                     } else {
                                         //如果没有接口把自己的class当成key，实例对象当成value
-                                        System.out.println("正在加载【" + aClass.getName() + "】,实例对象是：" + instance.getClass().getName());
+                                        System.out.println("正在加载【" + aClass.getName() + "】, 实例对象是：" + instance.getClass().getName());
                                         beanFactory.put(aClass, instance);
                                     }
                                 }
                             }
-                        } catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
+                        } catch (ClassNotFoundException | IllegalAccessException | InstantiationException |
+                                 NoSuchMethodException | InvocationTargetException e) {
                             e.printStackTrace();
                         }
                     }
@@ -86,7 +87,7 @@ public class AnnotationApplicationContext implements ApplicationContext {
     }
 
     private void loadAutowired() {
-        for(Map.Entry<Class, Object> entry : beanFactory.entrySet()){
+        for (Map.Entry<Class, Object> entry : beanFactory.entrySet()) {
             //就是咱们放在容器的对象
             Object obj = entry.getValue();
             Class<?> aClass = obj.getClass();
@@ -96,7 +97,7 @@ public class AnnotationApplicationContext implements ApplicationContext {
                 if (annotation != null) {
                     field.setAccessible(true);
                     try {
-                        System.out.println("正在给【"+obj.getClass().getName()+"】属性【" + field.getName() + "】注入值【"+ beanFactory.get(field.getType()).getClass().getName() +"】");
+                        System.out.println("正在给【" + obj.getClass().getName() + "】属性【" + field.getName() + "】注入值【" + beanFactory.get(field.getType()).getClass().getName() + "】");
                         field.set(obj, beanFactory.get(field.getType()));
                     } catch (IllegalAccessException e) {
                         e.printStackTrace();
